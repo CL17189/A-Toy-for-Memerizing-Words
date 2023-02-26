@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>单词表格</title>
+  <style>
+    
+    table,
+    th,
+    td {
+      border: 1px solid black;
+      border-collapse: collapse;
+      padding: 5px;
+      table-layout: fixed;
+      text-align: center;
+    }
+
+    .left {
+      width: 50%;
+      display: table-cell;
+    }
+
+    .right {
+      width: 50%;
+      display: table-cell;
+      vertical-align: top;
+    }
+
+    #text {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: larger;
+      width: auto;
+      height: auto;
+      margin-top: 10px;
+      border: 1px solid black;
+      padding: 5px;
+    }
+  </style>
+</head>
+
+<body>
+  <button id="generate" onclick="generateRandom()" k>生成随机数</button>
+  <p>生成的随机整数 k 是：<span id="k-value"></span></p>
+
+  <div class="wrapper">
+    <div class="left">
+      <table>
+        <thead>
+          <tr>
+            <th width="200">Words</th>
+            <th width="200">Part</th>
+            <th width="200">Meaning</th>
+          </tr>
+        </thead>
+        <tbody id="wordTable">
+        </tbody>
+      </table>
+    </div>
+
+    <div class="right">
+      <p>passage:</p>
+      <div id="text"></div>
+    </div>
+  </div>
+
+  <script>
+    function generateRandom() {
+      // 生成随机数
+      const k = Math.floor(Math.random() * 72);
+
+      const kValueElement = document.getElementById("k-value"); 
+      kValueElement.innerHTML = k;
+      //const k = 0;
+      // 读取csv文件
+      fetch('new_word.csv')
+        .then(response => response.text())
+        .then(text => {
+          // 解析csv文件内容
+          const rows = text.split('\n').slice(1 + k * 20, 1 + (k + 1) * 20);
+          const data = rows.map(row => {
+            const [Words, Part, Meaning, Date, Link] = row.split(',');
+            return { Words, Part, Meaning, Date, Link };
+          });
+          // 在表格中显示单词和意思
+          const wordTable = document.getElementById('wordTable');
+          wordTable.innerHTML = '';
+          data.forEach(item => {
+            const row = document.createElement('tr');
+            const wordsCell = document.createElement('td');
+            const partCell = document.createElement('td');
+            //const dateCell = document.createElement('td');
+            const meaningCell = document.createElement('td');
+            wordsCell.textContent = item.Words;
+            partCell.textContent = item.Part;
+            meaningCell.textContent = item.Meaning;
+            row.appendChild(wordsCell);
+            row.appendChild(partCell);
+            row.appendChild(meaningCell);
+            wordTable.appendChild(row);
+          });
+          // 在文本框中显示文件内容
+          const textArea = document.getElementById('text');
+          //document.write(data[0].Part)
+          fetch(data[0].Link)
+            .then(response => response.text())
+            .then(text => {
+              textArea.textContent = text;
+            });
+        });
+    }
+  </script>
+</body>
+
+</html>
